@@ -83,3 +83,10 @@ if __name__ == "__main__":
         intersectedDict = {x: data[x] for x in data if x in SANITIZED_DICT}
         intersectedDictJson = json.dumps(intersectedDict)
         print(f"{intersectedDictJson}")
+
+    currentDate = str(datetime.datetime.now())
+    filename = FINAL_DICTS_PATH + currentDate
+    makedirs(path.dirname(filename), exist_ok=True)
+
+    with open(filename, "w") as file:
+        file.write(intersectedDictJson)
