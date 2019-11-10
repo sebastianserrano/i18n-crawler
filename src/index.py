@@ -96,35 +96,38 @@ def intersectJsons(original, sanitized):
     8. Output will be a valid Javascript object that can be injected into the translation tool
 """
 if __name__ == "__main__":
-    for root, dirs, files in walk(ROOT_PATH):
-        for item in IGNORE_DIRS:
-            if item in dirs:
-                dirs.remove(item)
-        if len(files) >= 1:
-            for file in files:
-                openFile(root, file)
-        else:
-            for file in files:
-                openFile(root, file)
+    try:
+        for root, dirs, files in walk(ROOT_PATH):
+            for item in IGNORE_DIRS:
+                if item in dirs:
+                    dirs.remove(item)
+            if len(files) >= 1:
+                for file in files:
+                    openFile(root, file)
+            else:
+                for file in files:
+                    openFile(root, file)
 
-    for chunk in STRIPPED_CHUNKS:
-        mappedLine = remapLineToDict(chunk)
+        for chunk in STRIPPED_CHUNKS:
+            remapLineToDict(chunk)
 
-    for chunk in JSON_CHUNKS:
-        deep_merge_dicts(SANITIZED_JSON, chunk)
+        for chunk in JSON_CHUNKS:
+            deep_merge_dicts(SANITIZED_JSON, chunk)
 
-    with open(DIRTY_JSON_PATH, 'r') as json_file:
-        dirtyJSON = json.load(json_file)
-        intersectedDict = intersectJsons(dirtyJSON, SANITIZED_JSON)
+        with open(DIRTY_JSON_PATH, 'r') as json_file:
+            dirtyJSON = json.load(json_file)
+            intersectedDict = intersectJsons(dirtyJSON, SANITIZED_JSON)
 
-    currentDate = str(datetime.datetime.now())
-    filename = FINAL_DICTS_PATH + currentDate
-    makedirs(path.dirname(filename), exist_ok=True)
+        currentDate = str(datetime.datetime.now())
+        filename = FINAL_DICTS_PATH + currentDate
+        makedirs(path.dirname(filename), exist_ok=True)
 
-    with open(filename, "w") as file:
-        file.write(str(intersectedDict))
+        with open(filename, "w") as file:
+            file.write(str(intersectedDict))
 
-    print(f"\nSuccessfully sanitized i18n occurrences recursively"
-          f" from {ROOT_PATH} and {DIRTY_JSON_PATH}"
-          f"\nwith {len(ERROR_FILENAMES)} unabled to open files:"
-          f" {ERROR_FILENAMES}\n")
+        print(f"\nSuccessfully sanitized i18n occurrences recursively"
+              f" from {ROOT_PATH} and {DIRTY_JSON_PATH}"
+              f"\nwith {len(ERROR_FILENAMES)} unabled to open files:"
+              f" {ERROR_FILENAMES}\n")
+    except Exception as error:
+        print(f"\nSomething went terribly wrong {error}\n")
