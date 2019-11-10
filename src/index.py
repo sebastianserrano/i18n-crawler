@@ -77,8 +77,8 @@ if __name__ == "__main__":
     for chunk in JSON_CHUNKS:
         deep_merge_dicts(SANITIZED_DICT, chunk)
 
-with open('test.json', 'r') as json_file:
-    data = json.load(json_file)
-    d = {x: data[x] for x in data if x in com}
-    f = json.dumps(d)
-    print(f"{f}")
+    with open(DIRTY_JSON_PATH, 'r') as json_file:
+        data = json.load(json_file)
+        intersectedDict = {x: data[x] for x in data if x in SANITIZED_DICT}
+        intersectedDictJson = json.dumps(intersectedDict)
+        print(f"{intersectedDictJson}")
