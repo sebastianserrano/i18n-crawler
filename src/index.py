@@ -3,7 +3,8 @@ import json
 from os import walk
 from os.path import join
 
-ROOT_PATH = ""
+ROOT_PATH = "/Users/sebastianserrano/WebstormProjects/shopify-master/app"
+DIRTY_JSON_PATH = ""
 I18N_PREFIX_CALL = "i18n.t"
 I18N_GROUP_NAME = "chunk"
 I18N_CALL_REGEX = ".*\{i18n.t\(\"(?P<chunk>.*)\"\)\}"
