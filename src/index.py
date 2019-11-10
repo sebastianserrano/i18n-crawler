@@ -16,10 +16,11 @@ def checkI18nExistance(line):
     match = re.match(I18N_CALL_REGEX, line)
     return match
 
-
 def extractChunkFromLine(line):
     return line.group("chunk")
 
+def collectChunkInList(list, chunk):
+    list.append(chunk)
 
 def openFile(root, file):
     fullPath = join(root, file)
@@ -34,31 +35,19 @@ def openFile(root, file):
         print(f"Could not open file at path {fullPath} because {error}")
         pass
 
+def convertStrippedChunkIntoList(chunk):
+    return list(map(lambda s: s.strip(), chunk.split('.')))
+
 def remapLineToDict(line):
-    fields = list(map(lambda s: s.strip(), line.split('.')))
-    def reduceFields(fields):
+    fields = convertStrippedChunkIntoList(line)
+    def remapFieldsToDict(fields):
         if (len(fields) > 1):
-            callback = reduceFields(fields[1:])
+            callback = remapFieldsToDict(fields[1:])
             return {fields[0]: callback}
         return {fields[0]: fields[0]}
 
-    mappedChunk = reduceFields(fields)
-    JSON_CHUNKS.append(mappedChunk)
-
-for root, dirs, files in walk(ROOT_PATH):
-    for item in IGNORE_DIRS:
-        if item in dirs:
-            dirs.remove(item)
-    if len(files) >= 1:
-        for file in files:
-            openFile(root, file)
-    else:
-        for file in files:
-            openFile(root, file)
-
-
-for chunk in STRIPPED_CHUNKS:
-    mappedLine = remapLineToDict(chunk)
+    mappedChunk = remapFieldsToDict(fields)
+    collectChunkInList(JSON_CHUNKS, mappedChunk)
 
 def deep_merge_dicts(original, incoming):
     for key in incoming:
@@ -70,9 +59,23 @@ def deep_merge_dicts(original, incoming):
         else:
             original[key] = incoming[key]
 
-com = {}
-for chunk in JSON_CHUNKS:
-    deep_merge_dicts(com, chunk)
+if __name__ == "__main__":
+    for root, dirs, files in walk(ROOT_PATH):
+        for item in IGNORE_DIRS:
+            if item in dirs:
+                dirs.remove(item)
+        if len(files) >= 1:
+            for file in files:
+                openFile(root, file)
+        else:
+            for file in files:
+                openFile(root, file)
+
+    for chunk in STRIPPED_CHUNKS:
+        mappedLine = remapLineToDict(chunk)
+
+    for chunk in JSON_CHUNKS:
+        deep_merge_dicts(SANITIZED_DICT, chunk)
 
 with open('test.json', 'r') as json_file:
     data = json.load(json_file)
