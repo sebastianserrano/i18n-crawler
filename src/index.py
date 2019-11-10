@@ -10,10 +10,7 @@ I18N_CALL_REGEX = ".*\{i18n.t\(\"(?P<chunk>.*)\"\)\}"
 IGNORE_DIRS = ["node_modules", ".next"]
 STRIPPED_CHUNKS = []
 JSON_CHUNKS = []
-
-def collectChunkInList(list, chunk):
-    list.append(chunk)
-
+SANITIZED_DICT = {}
 
 def checkI18nExistance(line):
     match = re.match(I18N_CALL_REGEX, line)
