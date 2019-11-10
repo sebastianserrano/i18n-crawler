@@ -16,16 +16,20 @@ STRIPPED_CHUNKS = []
 JSON_CHUNKS = []
 SANITIZED_JSON = {}
 
+""" Check if line is calling i18n """
 def checkI18nExistance(line):
     match = re.match(I18N_REGEX, line)
     return match
 
+""" Extract string(path) from i18n call """
 def extractChunkFromLine(line):
     return line.group(I18N_REGEX_GROUP_NAME)
 
+""" Append chunk to param list """
 def collectChunkInList(list, chunk):
     list.append(chunk)
 
+""" Open file and look for i18n call on every line """
 def openFile(root, file):
     fullPath = join(root, file)
 
@@ -39,11 +43,17 @@ def openFile(root, file):
         print(f"Could not open file at path {fullPath} because {error}")
         pass
 
+""" Convert editProduct.genre.error to [editProduct, genre, error] """
 def convertStrippedChunkIntoList(chunk):
     return list(map(lambda s: s.strip(), chunk.split('.')))
 
+""" Convert 'editProduct.genre.error' to {editProduct: {genre: {error: error}}} """
 def remapLineToDict(line):
     fields = convertStrippedChunkIntoList(line)
+
+    """ Convert editProduct.genre.error recursively to {editProduct: {genre: {error: error}}} 
+        In order to reconstruct true dict skeleton. Leaf value will be replaced after 
+    """
     def remapFieldsToDict(fields):
         if (len(fields) > 1):
             callback = remapFieldsToDict(fields[1:])
@@ -53,6 +63,7 @@ def remapLineToDict(line):
     mappedChunk = remapFieldsToDict(fields)
     collectChunkInList(JSON_CHUNKS, mappedChunk)
 
+""" Traverse paths of two dicts and only merge once these diverge taking only the leaves """
 def deep_merge_dicts(original, incoming):
     for key in incoming:
         if key in original:
@@ -63,10 +74,27 @@ def deep_merge_dicts(original, incoming):
         else:
             original[key] = incoming[key]
 
+""" 
+    one = {a: {b: {c: c}}} <= Extracted from i18nt.('a.b.c')
+    two = {a: {b: {c: "Hello"}}} <= Extracted from dirty translations.js file
+    
+    result = {a: {b: {c: "Hello"}}}
+"""
 def intersectJsons(original, sanitized):
     return {x: original[x] for x in original if x in sanitized}
 
-
+"""
+    Main entrypoint.
+    
+    1. Traverse ROOT_PATH recursively to find all occurrences of the i18n.t() call
+    2. Extract 'settings.account.dummy' from i18.t('settings.account.dummy')
+    3. Convert 'settings.account.dummy' to {settings: {account: {dummy: dummy }}}
+    4. Convert single dicts into a global sanitized dict with deep_merge_dicts
+    5. Intersect sanitized global dict with dirty dict from translations.js replacing leaves along the way
+    6. Convert newly merged sanitized global dict into json
+    7. Save final output to file under sanitized-dicts for later extraction
+    8. Output will be a valid Javascript object that can be injected into the translation tool
+"""
 if __name__ == "__main__":
     for root, dirs, files in walk(ROOT_PATH):
         for item in IGNORE_DIRS:
@@ -88,12 +116,10 @@ if __name__ == "__main__":
     with open(DIRTY_JSON_PATH, 'r') as json_file:
         dirtyJSON = json.load(json_file)
         intersectedDict = intersectJsons(dirtyJSON, SANITIZED_JSON)
-        intersectedDictJson = json.dumps(intersectedDict)
-        print(f"{intersectedDictJson}")
 
     currentDate = str(datetime.datetime.now())
     filename = FINAL_DICTS_PATH + currentDate
     makedirs(path.dirname(filename), exist_ok=True)
 
     with open(filename, "w") as file:
-        file.write(intersectedDictJson)
+        file.write(str(intersectedDict))
