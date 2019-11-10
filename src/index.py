@@ -1,24 +1,27 @@
 import re
 import json
-from os import walk
+import datetime;
+from os import walk, makedirs, path
 from os.path import join
 
 ROOT_PATH = "/Users/sebastianserrano/WebstormProjects/shopify-master/app"
-DIRTY_JSON_PATH = ""
+DIRTY_JSON_PATH = "test.json"
+FINAL_DICTS_PATH = "sanitized-dicts/"
+
 I18N_PREFIX_CALL = "i18n.t"
-I18N_GROUP_NAME = "chunk"
-I18N_CALL_REGEX = ".*\{i18n.t\(\"(?P<chunk>.*)\"\)\}"
+I18N_REGEX_GROUP_NAME = "chunk"
+I18N_REGEX = '.*\{i18n.t\(\"(?P<' + I18N_REGEX_GROUP_NAME + '>.*)\"\)\}'
 IGNORE_DIRS = ["node_modules", ".next"]
 STRIPPED_CHUNKS = []
 JSON_CHUNKS = []
-SANITIZED_DICT = {}
+SANITIZED_JSON = {}
 
 def checkI18nExistance(line):
-    match = re.match(I18N_CALL_REGEX, line)
+    match = re.match(I18N_REGEX, line)
     return match
 
 def extractChunkFromLine(line):
-    return line.group("chunk")
+    return line.group(I18N_REGEX_GROUP_NAME)
 
 def collectChunkInList(list, chunk):
     list.append(chunk)
@@ -60,6 +63,10 @@ def deep_merge_dicts(original, incoming):
         else:
             original[key] = incoming[key]
 
+def intersectJsons(original, sanitized):
+    return {x: original[x] for x in original if x in sanitized}
+
+
 if __name__ == "__main__":
     for root, dirs, files in walk(ROOT_PATH):
         for item in IGNORE_DIRS:
@@ -76,11 +83,11 @@ if __name__ == "__main__":
         mappedLine = remapLineToDict(chunk)
 
     for chunk in JSON_CHUNKS:
-        deep_merge_dicts(SANITIZED_DICT, chunk)
+        deep_merge_dicts(SANITIZED_JSON, chunk)
 
     with open(DIRTY_JSON_PATH, 'r') as json_file:
-        data = json.load(json_file)
-        intersectedDict = {x: data[x] for x in data if x in SANITIZED_DICT}
+        dirtyJSON = json.load(json_file)
+        intersectedDict = intersectJsons(dirtyJSON, SANITIZED_JSON)
         intersectedDictJson = json.dumps(intersectedDict)
         print(f"{intersectedDictJson}")
 
