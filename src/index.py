@@ -15,6 +15,7 @@ IGNORE_DIRS = ["node_modules", ".next"]
 STRIPPED_CHUNKS = []
 JSON_CHUNKS = []
 SANITIZED_JSON = {}
+ERROR_FILENAMES = []
 
 """ Check if line is calling i18n """
 def checkI18nExistance(line):
@@ -39,9 +40,8 @@ def openFile(root, file):
             if result:
                 chunk = extractChunkFromLine(result)
                 collectChunkInList(STRIPPED_CHUNKS, chunk)
-    except Exception as error:
-        print(f"Could not open file at path {fullPath} because {error}")
-        pass
+    except Exception:
+        collectChunkInList(ERROR_FILENAMES, file)
 
 """ Convert editProduct.genre.error to [editProduct, genre, error] """
 def convertStrippedChunkIntoList(chunk):
@@ -123,3 +123,8 @@ if __name__ == "__main__":
 
     with open(filename, "w") as file:
         file.write(str(intersectedDict))
+
+    print(f"\nSuccessfully sanitized i18n occurrences recursively"
+          f" from {ROOT_PATH} and {DIRTY_JSON_PATH}"
+          f"\nwith {len(ERROR_FILENAMES)} unabled to open files:"
+          f" {ERROR_FILENAMES}\n")
