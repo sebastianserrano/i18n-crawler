@@ -3,6 +3,7 @@ import json
 from os import walk
 from os.path import join
 
+ROOT_PATH = ""
 I18N_PREFIX_CALL = "i18n.t"
 I18N_GROUP_NAME = "chunk"
 I18N_CALL_REGEX = ".*\{i18n.t\(\"(?P<chunk>.*)\"\)\}"
@@ -47,7 +48,7 @@ def remapLineToDict(line):
     mappedChunk = reduceFields(fields)
     JSON_CHUNKS.append(mappedChunk)
 
-for root, dirs, files in walk("/Users/sebastianserrano/WebstormProjects/shopify/app"):
+for root, dirs, files in walk(ROOT_PATH):
     for item in IGNORE_DIRS:
         if item in dirs:
             dirs.remove(item)
