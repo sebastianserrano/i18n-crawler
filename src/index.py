@@ -91,9 +91,8 @@ def intersectJsons(original, sanitized):
     3. Convert 'settings.account.dummy' to {settings: {account: {dummy: dummy }}}
     4. Convert single dicts into a global sanitized dict with deep_merge_dicts
     5. Intersect sanitized global dict with dirty dict from translations.js replacing leaves along the way
-    6. Convert newly merged sanitized global dict into json
-    7. Save final output to file under sanitized-dicts for later extraction
-    8. Output will be a valid Javascript object that can be injected into the translation tool
+    6. Save final sanitized global output to file under sanitized-dicts for later extraction
+    7. Output will be a valid Javascript object that can be injected into the translation tool
 """
 if __name__ == "__main__":
     try:
