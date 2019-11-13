@@ -10,7 +10,7 @@ FINAL_DICTS_PATH = "sanitized-dicts/"
 
 I18N_PREFIX_CALL = "i18n.t"
 I18N_REGEX_GROUP_NAME = "chunk"
-I18N_REGEX = '.*\{i18n.t\(\"(?P<' + I18N_REGEX_GROUP_NAME + '>.*)\"\)\}'
+I18N_REGEX = r".*i18n.t\(\"\b(?P<" + I18N_REGEX_GROUP_NAME + r">.*)\b\".*\)"
 IGNORE_DIRS = ["node_modules", ".next"]
 STRIPPED_CHUNKS = []
 JSON_CHUNKS = []
