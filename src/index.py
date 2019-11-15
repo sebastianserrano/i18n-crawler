@@ -29,18 +29,22 @@ JSON_CHUNKS = []
 SANITIZED_JSON = {}
 ERROR_FILENAMES = []
 
+
 def checkI18nExistance(line):
     """ Check if line is calling i18n """
     match = re.match(I18N_REGEX, line)
     return match
 
+
 def extractChunkFromLine(line):
     """ Extract string(path) from i18n call """
     return line.group(I18N_REGEX_GROUP_NAME)
 
-def collectChunkInList(list, chunk):
+
+def collectChunkInList(array, chunk):
     """ Append chunk to param list """
-    list.append(chunk)
+    array.append(chunk)
+
 
 def openFile(root, file):
     """ Open file and look for i18n call on every line """
@@ -52,12 +56,14 @@ def openFile(root, file):
             if result:
                 chunk = extractChunkFromLine(result)
                 collectChunkInList(STRIPPED_CHUNKS, chunk)
-    except Exception:
+    except:
         collectChunkInList(ERROR_FILENAMES, file)
+
 
 def convertStrippedChunkIntoList(chunk):
     """ Convert editProduct.genre.error to [editProduct, genre, error] """
     return list(map(lambda s: s.strip(), chunk.split('.')))
+
 
 def remapLineToDict(line):
     """ Convert 'editProduct.genre.error' to {editProduct: {genre: {error: error}}} """
@@ -67,13 +73,14 @@ def remapLineToDict(line):
         """ Convert editProduct.genre.error recursively to {editProduct: {genre: {error: error}}}
             In order to reconstruct true dict skeleton. Leaf value will be replaced after
         """
-        if (len(fields) > 1):
+        if len(fields) > 1:
             callback = remapFieldsToDict(fields[1:])
             return {fields[0]: callback}
         return {fields[0]: fields[0]}
 
     mappedChunk = remapFieldsToDict(fields)
     collectChunkInList(JSON_CHUNKS, mappedChunk)
+
 
 def deep_merge_dicts(original, incoming):
     """ Traverse paths of two dicts and only merge once these diverge taking only the leaves """
@@ -86,6 +93,7 @@ def deep_merge_dicts(original, incoming):
         else:
             original[key] = incoming[key]
 
+
 def intersectJsons(original, sanitized):
     """
         one = {a: {b: {c: c}}} <= Extracted from i18nt.('a.b.c')
@@ -94,6 +102,7 @@ def intersectJsons(original, sanitized):
         result = {a: {b: {c: "Hello"}}}
     """
     return {x: original[x] for x in original if x in sanitized}
+
 
 if __name__ == "__main__":
     try:
