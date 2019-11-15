@@ -42,6 +42,6 @@ class Testi18nRegex:
         assert not match
 
     def testI18nDoesNotMatchWithoutOpeningNecessaryi18n_tCall(self):
-        line = '("settings.expiryBanner.expired)'
+        line = '("settings.expiryBanner.expired")'
         match = index.checkI18nExistance(line)
         assert not match
