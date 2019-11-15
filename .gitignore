@@ -3,3 +3,6 @@
 venv
 target
 sanitized-dicts
+lib
+bin
+include
