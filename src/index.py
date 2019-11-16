@@ -4,7 +4,7 @@
     1. Traverse ROOT_PATH recursively to find all occurrences of the i18n.t() call
     2. Extract 'settings.account.dummy' from i18.t('settings.account.dummy')
     3. Convert 'settings.account.dummy' to {settings: {account: {dummy: dummy }}}
-    4. Convert single dicts into a global sanitized dict with deep_merge_dicts
+    4. Convert single dicts into a global sanitized dict with deepMergeDicts
     5. Intersect sanitized global dict with dirty dict from translations.js replacing leaves along the way
     6. Save final sanitized global output to file under sanitized-dicts for later extraction
     7. Output will be a valid Javascript object that can be injected into the translation tool
@@ -83,12 +83,12 @@ def remapLineToDict(line):
     collectChunkInList(JSON_CHUNKS, mappedChunk)
 
 
-def deep_merge_dicts(original, incoming):
+def deepMergeDicts(original, incoming):
     """ Traverse paths of two dicts and only merge once these diverge taking only the leaves """
     for key in incoming:
         if key in original:
             if isinstance(original[key], dict) and isinstance(incoming[key], dict):
-                deep_merge_dicts(original[key], incoming[key])
+                deepMergeDicts(original[key], incoming[key])
             else:
                 original[key] = incoming[key]
         else:
@@ -122,7 +122,7 @@ if __name__ == "__main__":
             remapLineToDict(chunk)
 
         for chunk in JSON_CHUNKS:
-            deep_merge_dicts(SANITIZED_JSON, chunk)
+            deepMergeDicts(SANITIZED_JSON, chunk)
 
         with open(DIRTY_JSON_PATH, 'r') as json_file:
             dirtyJSON = json.load(json_file)
