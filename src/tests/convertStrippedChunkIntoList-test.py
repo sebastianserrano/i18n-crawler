@@ -1,4 +1,4 @@
-""" Regex testing """
+""" String to list conversion testing """
 from grappa import expect
 from src.index import convertStrippedChunkIntoList
 
