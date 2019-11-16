@@ -65,18 +65,19 @@ def convertStrippedChunkIntoList(chunk):
     return list(map(lambda s: s.strip(), chunk.split('.')))
 
 
+def remapFieldsToDict(fields):
+    """ Convert editProduct.genre.error recursively to {editProduct: {genre: {error: error}}}
+        In order to reconstruct true dict skeleton. Leaf value will be replaced after
+    """
+    if len(fields) > 1:
+        callback = remapFieldsToDict(fields[1:])
+        return {fields[0]: callback}
+    return {fields[0]: fields[0]}
+
+
 def remapLineToDict(line):
     """ Convert 'editProduct.genre.error' to {editProduct: {genre: {error: error}}} """
     fields = convertStrippedChunkIntoList(line)
-
-    def remapFieldsToDict(fields):
-        """ Convert editProduct.genre.error recursively to {editProduct: {genre: {error: error}}}
-            In order to reconstruct true dict skeleton. Leaf value will be replaced after
-        """
-        if len(fields) > 1:
-            callback = remapFieldsToDict(fields[1:])
-            return {fields[0]: callback}
-        return {fields[0]: fields[0]}
 
     mappedChunk = remapFieldsToDict(fields)
     collectChunkInList(JSON_CHUNKS, mappedChunk)
