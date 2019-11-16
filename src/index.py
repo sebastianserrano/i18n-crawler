@@ -32,7 +32,7 @@ ERROR_FILENAMES = []
 
 def checkI18nExistance(line):
     """ Check if line is calling i18n """
-    match = re.match(I18N_REGEX, line)
+    match = re.search(I18N_REGEX, line)
     return match
 
 
