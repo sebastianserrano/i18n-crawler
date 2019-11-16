@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "a210cf2f70393d1c5fd083219e01702f9bd62743dd189c1c5ff924cc55c94efa"
+            "sha256": "eb31e1bc2319d1acaf89e154ed398839ed2590425637fcefd958c2ad47d3ef75"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -125,6 +125,21 @@
                 "sha256:f7b7ce16570fe9965acd6d30101a28f62fb4a7f9e926b3bbc9b61f8b04247e72"
             ],
             "version": "==19.3.0"
+        },
+        "colorama": {
+            "hashes": [
+                "sha256:463f8483208e921368c9f306094eb6f725c6ca42b0f97e313cb5d5512459feda",
+                "sha256:48eb22f4f8461b1df5734a074b57042430fb06e1d61bd1e11b078c0fe6d7a1f1"
+            ],
+            "version": "==0.3.9"
+        },
+        "grappa": {
+            "hashes": [
+                "sha256:5618689d7a80c225f46f282366738964e397b8f3573497b855da8f6d1096b79d",
+                "sha256:9e9a98312ca4925f8134bb0c1ec3245e6635b10f3b74d047b9cf8569817fdccf"
+            ],
+            "index": "pypi",
+            "version": "==0.1.10"
         },
         "importlib-metadata": {
             "hashes": [
