@@ -83,11 +83,15 @@ def remapLineToDict(line):
     collectChunkInList(JSON_CHUNKS, mappedChunk)
 
 
+def checkValueIsDictionary(object, key):
+    return isinstance(object[key], dict)
+
+
 def deepMergeDicts(original, incoming):
     """ Traverse paths of two dicts and only merge once these diverge taking only the leaves """
     for key in incoming:
         if key in original:
-            if isinstance(original[key], dict) and isinstance(incoming[key], dict):
+            if checkValueIsDictionary(original, key) and checkValueIsDictionary(incoming, key):
                 deepMergeDicts(original[key], incoming[key])
             else:
                 original[key] = incoming[key]
@@ -101,10 +105,6 @@ def checkDictionaryHasMoreThanOneValue(sanitized):
 
 def checkValueIsNotADictionary(sanitized):
     return not isinstance(list(sanitized.values())[0], dict)
-
-
-def checkValueIsDictionary(object, key):
-    return isinstance(object[key], dict)
 
 
 def intersectDictionaries(sanitized, dirty):
