@@ -95,14 +95,28 @@ def deepMergeDicts(original, incoming):
             original[key] = incoming[key]
 
 
-def intersectJsons(original, sanitized):
-    """
-        one = {a: {b: {c: c}}} <= Extracted from i18nt.('a.b.c')
-        two = {a: {b: {c: "Hello"}}} <= Extracted from dirty translations.js file
+def checkDictionaryHasMoreThanOneValue(sanitized):
+    return len(list(sanitized.values())) >= 1
 
-        result = {a: {b: {c: "Hello"}}}
-    """
-    return {x: original[x] for x in original if x in sanitized}
+
+def checkValueIsNotADictionary(sanitized):
+    return not isinstance(list(sanitized.values())[0], dict)
+
+
+def checkValueIsDictionary(object, key):
+    return isinstance(object[key], dict)
+
+
+def intersectDictionaries(sanitized, dirty):
+    if checkDictionaryHasMoreThanOneValue(sanitized) and checkValueIsNotADictionary(sanitized):
+        for key in sanitized:
+            if key in dirty:
+                sanitized[key] = dirty[key]
+    else:
+        for key in sanitized:
+            if key in dirty:
+                if checkValueIsDictionary(sanitized, key) and checkValueIsDictionary(dirty, key):
+                    intersectDictionaries(sanitized[key], dirty[key])
 
 
 if __name__ == "__main__":
@@ -126,14 +140,14 @@ if __name__ == "__main__":
 
         with open(DIRTY_JSON_PATH, 'r') as json_file:
             dirtyJSON = json.load(json_file)
-            intersectedDict = intersectJsons(dirtyJSON, SANITIZED_JSON)
+            intersectDictionaries(SANITIZED_JSON, dirtyJSON)
 
         currentDate = str(datetime.datetime.now())
         filename = FINAL_DICTS_PATH + currentDate
         makedirs(path.dirname(filename), exist_ok=True)
 
         with open(filename, "w") as file:
-            file.write(str(intersectedDict))
+            file.write(str(SANITIZED_JSON))
 
         print(f"\nSuccessfully sanitized i18n occurrences recursively"
               f" from {ROOT_PATH} and {DIRTY_JSON_PATH}"
